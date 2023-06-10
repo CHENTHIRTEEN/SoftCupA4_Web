@@ -25,8 +25,8 @@
 ```bash
 git clone https://github.com/CHENTHIRTEEN/SoftCupA4_Web.git
 cd SoftCupA4_Web
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 ```
 
 ### :open_file_folder:项目结构
@@ -47,3 +47,5 @@ npm run dev
         ├─login
         └─page
 ```
+
+- [x] 迁移包管理器到pnpm
