@@ -14,6 +14,7 @@ export default {
 
 <template>
   <div>
+    <h1>数据可视化</h1>
     <el-row>
       <el-col>
         <h1>测试页面</h1>

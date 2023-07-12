@@ -5,10 +5,9 @@ import './assets/css/tailwind.css'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
-// import ArcoVue from '@arco-design/web-vue'
-// import '@arco-design/web-vue/dist/arco.css'
 import http from './api'
-
+// import 'normalize.css'
+import 'dayjs'
 
 const app = createApp(App);
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
