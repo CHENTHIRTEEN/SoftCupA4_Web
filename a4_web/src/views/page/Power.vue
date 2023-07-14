@@ -172,7 +172,7 @@ export default {
   </el-row>
   <el-row>
     <el-col :span="24">
-      <el-button @click="predict"></el-button>
+      <el-button @click="predict">test</el-button>
       <div id="chart" style="width: 1200px;height:800px;"></div>
     </el-col>
   </el-row>

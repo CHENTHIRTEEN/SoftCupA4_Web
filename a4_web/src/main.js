@@ -9,7 +9,6 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import http from './api'
 // import 'normalize.css'
 import 'dayjs'
-import './mock/mock.js'
 
 
 const app = createApp(App);
