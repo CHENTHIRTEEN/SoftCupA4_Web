@@ -1,8 +1,17 @@
 <script>
-import {inject, onMounted, ref} from 'vue'
+import {getCurrentInstance, inject, onMounted, ref} from 'vue'
 
 
 export default {
+  data(){
+    return{
+      params : {
+        'TurbID': '11',
+        'startDatetime': '2021-11-01 00:00:00',
+        'endDatetime': '2021-11-01 03:45:00'
+      }
+    }
+  },
   methods:{
     predict(){
       let params = {
@@ -50,19 +59,31 @@ export default {
         },
       },
     ]
-
-
-
     const $echarts = inject('echarts')
-    const line = () => {
+    const {appContext: {config: {globalProperties: global}}} = getCurrentInstance();
+    let params = {
+      'TurbID': '11',
+      'startDatetime': '2021-11-01 00:00:00',
+      'endDatetime': '2021-11-02 00:00:00'
+    }
+    global.$http.post('/predict/predict_dfloc', params).then((res) => {
+      const time = res.data.data.DATATIME
+      const data1 = res.data.data.YD15
+      const data2 = res.data.data.ROUND
+      console.log(time)
+      console.log(data1)
+      console.log(data2)
+      line(time, data1, data2)
+    })
+    const line = (time, data1, data2) => {
       const chartDom = document.getElementById('chart');
       const myChart = $echarts.init(chartDom);
       let option;
 
       option = {
         title: {
-          text: 'Distribution of Electricity',
-          subtext: 'Fake Data'
+          text: '功率预测',
+          // subtext: 'Fake Data'
         },
         tooltip: {
           trigger: 'axis',
@@ -71,7 +92,7 @@ export default {
           }
         },
         legend: {
-          data: ['YD15', 'Electricity']
+          data: ['YD15', 'ROUND(A.POWER,0)']
         },
         dataZoom: [
           {
@@ -99,7 +120,8 @@ export default {
           type: 'category',
           boundaryGap: false,
           // prettier-ignore
-          data: ['00:00', '01:15', '02:30', '03:45', '05:00', '06:15', '07:30', '08:45', '10:00', '11:15', '12:30', '13:45', '15:00', '16:15', '17:30', '18:45', '20:00', '21:15', '22:30', '23:45']
+          // data: ['00:00', '01:15', '02:30', '03:45', '05:00', '06:15', '07:30', '08:45', '10:00', '11:15', '12:30', '13:45', '15:00', '16:15', '17:30', '18:45', '20:00', '21:15', '22:30', '23:45']
+          data: time
         },
         yAxis: {
           type: 'value',
@@ -112,18 +134,20 @@ export default {
         },
         series: [
           {
-            name: 'Electricity',
+            name: 'ROUND(A.POWER,0)',
             type: 'line',
             smooth: true,
             // prettier-ignore
-            data: [300, 280, 250, 260, 270, 300, 550, 500, 400, 390, 380, 390, 400, 500, 600, 750, 800, 700, 600, 400]
+            data: data1
+            // data: [300, 280, 250, 260, 270, 300, 550, 500, 400, 390, 380, 390, 400, 500, 600, 750, 800, 700, 600, 400]
           },
           {
             name: 'YD15',
             type: 'line',
             smooth: true,
             // prettier-ignore
-            data: [200, 320, 125, 260, 300, 330, 560, 570, 370, 350, 310, 490, 450, 600, 600, 750, 600, 1200, 500, 700]
+            // data: [200, 320, 125, 260, 300, 330, 560, 570, 370, 350, 310, 490, 450, 600, 600, 750, 600, 1200, 500, 700]
+            data: data2
           }
         ]
       };
@@ -132,7 +156,16 @@ export default {
     }
     onMounted(() => {
       // $echarts.init(document.getElementById('chart'))
-      line()
+      // line(time, data1, data2)
+      // const {appContext: {config: {globalProperties: global}}} = getCurrentInstance();
+      // let params = {
+      //   'TurbID': '11',
+      //   'startDatetime': '2021-11-01 00:00:00',
+      //   'endDatetime': '2021-11-01 03:45:00'
+      // }
+      // global.$http.post('/predict/predict_dfloc', params).then((res) => {
+      //   console.log(res)
+      // })
     })
 
 
