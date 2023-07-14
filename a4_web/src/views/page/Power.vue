@@ -5,26 +5,24 @@ import {getCurrentInstance, inject, onMounted, ref} from 'vue'
 export default {
   data(){
     return{
-      params : {
-        'TurbID': '11',
-        'startDatetime': '2021-11-01 00:00:00',
-        'endDatetime': '2021-11-01 03:45:00'
-      }
+      options:[]
     }
   },
+  mounted() {
+    this.$http.get('/predict/showframlist').then(res => {
+      this.options = res.data.data
+      // for (const resKey in this.options) {
+      //   console.log(this.options[resKey])
+      // }
+    })
+  },
   methods:{
-    predict(){
-      let params = {
-        'TurbID': '11',
-        'startDatetime': '2021-11-01 00:00:00',
-        'endDatetime': '2021-11-01 03:45:00'
-      }
-      this.$http.post('/predict/predict_dfloc', params).then(res => {
-        console.log(res)
-      })
+    test(key) {
+      console.log(key)
     }
   },
   setup() {
+    const value = ref('')
     const value1 = ref<[Date, Date]>([
       new Date(2000, 10, 10, 10, 10),
       new Date(2000, 10, 11, 10, 10),
@@ -70,11 +68,12 @@ export default {
       const time = res.data.data.DATATIME
       const data1 = res.data.data.YD15
       const data2 = res.data.data.ROUND
-      console.log(time)
-      console.log(data1)
-      console.log(data2)
+      // console.log(time)
+      // console.log(data1)
+      // console.log(data2)
       line(time, data1, data2)
     })
+
     const line = (time, data1, data2) => {
       const chartDom = document.getElementById('chart');
       const myChart = $echarts.init(chartDom);
@@ -154,22 +153,11 @@ export default {
 
       option && myChart.setOption(option);
     }
-    onMounted(() => {
-      // $echarts.init(document.getElementById('chart'))
-      // line(time, data1, data2)
-      // const {appContext: {config: {globalProperties: global}}} = getCurrentInstance();
-      // let params = {
-      //   'TurbID': '11',
-      //   'startDatetime': '2021-11-01 00:00:00',
-      //   'endDatetime': '2021-11-01 03:45:00'
-      // }
-      // global.$http.post('/predict/predict_dfloc', params).then((res) => {
-      //   console.log(res)
-      // })
-    })
+
 
 
     return{
+      value,
       value1,
       value2,
       shortcuts
@@ -189,9 +177,8 @@ export default {
     <el-col :span="24"><div>功率预测</div></el-col>
   </el-row>
   <el-row>
-    <el-col :span="24">
-      <div class="block">
-<!--        <span class="demonstration">With shortcuts</span>-->
+    <el-col :span="8">
+      <div>
         <el-date-picker
             v-model="value2"
             type="datetimerange"
@@ -202,10 +189,22 @@ export default {
         />
       </div>
     </el-col>
+    <el-col :span="8">
+      <el-select v-model="value" clearable placeholder="Select" @change="test(value)">
+        <el-option
+            v-for="item in options"
+            :key="item.substring(0, 2)"
+            :label="item"
+            :value="item.substring(0, 2)"
+        />
+      </el-select>
+    </el-col>
+    <el-col :span="8">
+      <el-button type="success" @click="optionsInit">确认</el-button>
+    </el-col>
   </el-row>
   <el-row>
     <el-col :span="24">
-      <el-button @click="predict">test</el-button>
       <div id="chart" style="width: 1200px;height:800px;"></div>
     </el-col>
   </el-row>
