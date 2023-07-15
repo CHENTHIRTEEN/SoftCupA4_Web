@@ -1,11 +1,17 @@
 <script>
-import {getCurrentInstance, inject, onMounted, ref} from 'vue'
+import {getCurrentInstance, inject, ref} from 'vue'
+import * as $echarts from "echarts";
 
-
+let myChart;
 export default {
   data(){
     return{
-      options:[]
+      options:[],
+      value1:[],
+      // startDate:'',
+      // endDate:'',
+      // startTime:'',
+      // endTime:''
     }
   },
   mounted() {
@@ -17,46 +23,148 @@ export default {
     })
   },
   methods:{
-    test(key) {
-      console.log(key)
+    draw(time, data1, data2){
+      if (myChart != null && myChart !== "" && myChart !== undefined) {
+        myChart.dispose();//销毁
+      }
+      const chartDom = document.getElementById('chart');
+      myChart = $echarts.init(chartDom);
+      let option;
+
+      option = {
+          title: {
+            text: '功率预测',
+            // subtext: 'Fake Data'
+          },
+          tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+              type: 'cross'
+            }
+          },
+          legend: {
+            data: ['YD15', 'ROUND(A.POWER,0)']
+          },
+          dataZoom: [
+            {
+              show: true,
+              realtime: true,
+              start: 0,
+              end: 100,
+              xAxisIndex: [0, 1]
+            }
+            // {
+            //   type: 'inside',
+            //   realtime: true,
+            //   start: 30,
+            //   end: 70,
+            //   xAxisIndex: [0, 1]
+            // }
+          ],
+          toolbox: {
+            show: true,
+            feature: {
+              saveAsImage: {}
+            }
+          },
+          xAxis: {
+            type: 'category',
+            boundaryGap: false,
+            // prettier-ignore
+            // data: ['00:00', '01:15', '02:30', '03:45', '05:00', '06:15', '07:30', '08:45', '10:00', '11:15', '12:30', '13:45', '15:00', '16:15', '17:30', '18:45', '20:00', '21:15', '22:30', '23:45']
+            data: time
+          },
+          yAxis: {
+            type: 'value',
+            axisLabel: {
+              formatter: '{value} W'
+            },
+            axisPointer: {
+              snap: true
+            }
+          },
+          series: [
+            {
+              name: 'ROUND(A.POWER,0)',
+              type: 'line',
+              smooth: true,
+              // prettier-ignore
+              data: data1
+              // data: [300, 280, 250, 260, 270, 300, 550, 500, 400, 390, 380, 390, 400, 500, 600, 750, 800, 700, 600, 400]
+            },
+            {
+              name: 'YD15',
+              type: 'line',
+              smooth: true,
+              // prettier-ignore
+              // data: [200, 320, 125, 260, 300, 330, 560, 570, 370, 350, 310, 490, 450, 600, 600, 750, 600, 1200, 500, 700]
+              data: data2
+            }
+          ]
+        };
+
+      option && myChart.setOption(option);
+    },
+    predict(TurbID, startDatetime, endDatetime){
+      function f(a) {
+        let date = new Date(a);
+        let y = date.getFullYear();
+        let m = date.getMonth() + 1;
+        m = m < 10 ? ('0' + m) : m;
+        let d = date.getDate();
+        d = d < 10 ? ('0' + d) : d;
+        let h = date.getHours();
+        let minute = date.getMinutes();
+        h = h < 10 ? ('0' + h) : h;
+        minute = minute < 10 ? ('0' + minute) : minute;
+        return y + '-' + m + '-' + d+' '+h+':'+minute + ':00';
+      }
+      let start = f(startDatetime)
+      let end = f(endDatetime)
+      let params = {
+        'TurbID': TurbID,
+        'startDatetime': start,
+        'endDatetime': end
+      }
+      console.log(params)
+      this.$http.post('/predict/predict_dfloc', params).then((res) => {
+        const time = res.data.data.DATATIME
+        const data1 = res.data.data.YD15
+        const data2 = res.data.data.ROUND
+        // console.log(time)
+        // console.log(data1)
+        // console.log(data2)
+        this.draw(time, data1, data2)
+      })
+    },
+    disabledDate(time){
+      const minTime = parseInt(new Date(this.value1[0]).getTime() / 1000);
+      const maxTime = parseInt(new Date(this.value1[1]).getTime() / 1000);
+      // console.log(minTime)
+      // console.log(maxTime)
+      // console.log(time.getTime())
+      return time.getTime() < minTime - 24*3600000|| time.getTime() > maxTime;
+    },
+
+    show(value) {
+      console.log(value)
+    },
+    setDateRange(id) {
+      const param = {
+        "TurbID": id
+      }
+      this.$http.post('/predict/getdatarange', param).then(res => {
+        this.value1 = []
+        this.value1.push(res.data.start)
+        this.value1.push(res.data.end)
+      })
+      console.log("=========", this.value1[0])
     }
   },
   setup() {
+    // const value1 = ref('')
     const value = ref('')
-    const value1 = ref<[Date, Date]>([
-      new Date(2000, 10, 10, 10, 10),
-      new Date(2000, 10, 11, 10, 10),
-    ])
-    const value2 = ref('')
-    const shortcuts = [
-      {
-        text: 'Last week',
-        value: () => {
-          const end = new Date()
-          const start = new Date()
-          start.setTime(start.getTime() - 3600 * 1000 * 24 * 7)
-          return [start, end]
-        },
-      },
-      {
-        text: 'Last month',
-        value: () => {
-          const end = new Date()
-          const start = new Date()
-          start.setTime(start.getTime() - 3600 * 1000 * 24 * 30)
-          return [start, end]
-        },
-      },
-      {
-        text: 'Last 3 months',
-        value: () => {
-          const end = new Date()
-          const start = new Date()
-          start.setTime(start.getTime() - 3600 * 1000 * 24 * 90)
-          return [start, end]
-        },
-      },
-    ]
+
     const $echarts = inject('echarts')
     const {appContext: {config: {globalProperties: global}}} = getCurrentInstance();
     let params = {
@@ -71,96 +179,91 @@ export default {
       // console.log(time)
       // console.log(data1)
       // console.log(data2)
+      const line = (time, data1, data2) => {
+        const chartDom = document.getElementById('chart');
+        myChart = $echarts.init(chartDom);
+        let option;
+
+        option = {
+          title: {
+            text: '功率预测',
+            // subtext: 'Fake Data'
+          },
+          tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+              type: 'cross'
+            }
+          },
+          legend: {
+            data: ['YD15', 'ROUND(A.POWER,0)']
+          },
+          dataZoom: [
+            {
+              show: true,
+              realtime: true,
+              start: 0,
+              end: 100,
+              xAxisIndex: [0, 1]
+            }
+            // {
+            //   type: 'inside',
+            //   realtime: true,
+            //   start: 30,
+            //   end: 70,
+            //   xAxisIndex: [0, 1]
+            // }
+          ],
+          toolbox: {
+            show: true,
+            feature: {
+              saveAsImage: {}
+            }
+          },
+          xAxis: {
+            type: 'category',
+            boundaryGap: false,
+            // prettier-ignore
+            // data: ['00:00', '01:15', '02:30', '03:45', '05:00', '06:15', '07:30', '08:45', '10:00', '11:15', '12:30', '13:45', '15:00', '16:15', '17:30', '18:45', '20:00', '21:15', '22:30', '23:45']
+            data: time
+          },
+          yAxis: {
+            type: 'value',
+            axisLabel: {
+              formatter: '{value} W'
+            },
+            axisPointer: {
+              snap: true
+            }
+          },
+          series: [
+            {
+              name: 'ROUND(A.POWER,0)',
+              type: 'line',
+              smooth: true,
+              // prettier-ignore
+              data: data1
+              // data: [300, 280, 250, 260, 270, 300, 550, 500, 400, 390, 380, 390, 400, 500, 600, 750, 800, 700, 600, 400]
+            },
+            {
+              name: 'YD15',
+              type: 'line',
+              smooth: true,
+              // prettier-ignore
+              // data: [200, 320, 125, 260, 300, 330, 560, 570, 370, 350, 310, 490, 450, 600, 600, 750, 600, 1200, 500, 700]
+              data: data2
+            }
+          ]
+        };
+
+        option && myChart.setOption(option);
+      }
+
       line(time, data1, data2)
     })
-
-    const line = (time, data1, data2) => {
-      const chartDom = document.getElementById('chart');
-      const myChart = $echarts.init(chartDom);
-      let option;
-
-      option = {
-        title: {
-          text: '功率预测',
-          // subtext: 'Fake Data'
-        },
-        tooltip: {
-          trigger: 'axis',
-          axisPointer: {
-            type: 'cross'
-          }
-        },
-        legend: {
-          data: ['YD15', 'ROUND(A.POWER,0)']
-        },
-        dataZoom: [
-          {
-            show: true,
-            realtime: true,
-            start: 0,
-            end: 100,
-            xAxisIndex: [0, 1]
-          }
-          // {
-          //   type: 'inside',
-          //   realtime: true,
-          //   start: 30,
-          //   end: 70,
-          //   xAxisIndex: [0, 1]
-          // }
-        ],
-        toolbox: {
-          show: true,
-          feature: {
-            saveAsImage: {}
-          }
-        },
-        xAxis: {
-          type: 'category',
-          boundaryGap: false,
-          // prettier-ignore
-          // data: ['00:00', '01:15', '02:30', '03:45', '05:00', '06:15', '07:30', '08:45', '10:00', '11:15', '12:30', '13:45', '15:00', '16:15', '17:30', '18:45', '20:00', '21:15', '22:30', '23:45']
-          data: time
-        },
-        yAxis: {
-          type: 'value',
-          axisLabel: {
-            formatter: '{value} W'
-          },
-          axisPointer: {
-            snap: true
-          }
-        },
-        series: [
-          {
-            name: 'ROUND(A.POWER,0)',
-            type: 'line',
-            smooth: true,
-            // prettier-ignore
-            data: data1
-            // data: [300, 280, 250, 260, 270, 300, 550, 500, 400, 390, 380, 390, 400, 500, 600, 750, 800, 700, 600, 400]
-          },
-          {
-            name: 'YD15',
-            type: 'line',
-            smooth: true,
-            // prettier-ignore
-            // data: [200, 320, 125, 260, 300, 330, 560, 570, 370, 350, 310, 490, 450, 600, 600, 750, 600, 1200, 500, 700]
-            data: data2
-          }
-        ]
-      };
-
-      option && myChart.setOption(option);
-    }
-
-
-
     return{
       value,
-      value1,
-      value2,
-      shortcuts
+      // value1,
     }
 
   }
@@ -178,19 +281,15 @@ export default {
   </el-row>
   <el-row>
     <el-col :span="8">
-      <div>
-        <el-date-picker
-            v-model="value2"
-            type="datetimerange"
-            :shortcuts="shortcuts"
-            range-separator="To"
-            start-placeholder="Start date"
-            end-placeholder="End date"
-        />
-      </div>
+      <el-date-picker
+          v-model="value1"
+          type="datetimerange"
+          start-placeholder="Start Date"
+          end-placeholder="End Date"
+      />
     </el-col>
     <el-col :span="8">
-      <el-select v-model="value" clearable placeholder="Select" @change="test(value)">
+      <el-select v-model="value" clearable placeholder="Select" @change="setDateRange(value)">
         <el-option
             v-for="item in options"
             :key="item.substring(0, 2)"
@@ -199,14 +298,16 @@ export default {
         />
       </el-select>
     </el-col>
-    <el-col :span="8">
-      <el-button type="success" @click="optionsInit">确认</el-button>
+    <el-col :span="3">
+      <el-button type="success" @click="predict(value, value1[0], value1[1])">确认</el-button>
     </el-col>
   </el-row>
   <el-row>
-    <el-col :span="24">
+    <el-col :span="5"></el-col>
+    <el-col :span="12">
       <div id="chart" style="width: 1200px;height:800px;"></div>
     </el-col>
+    <el-col :span="6"></el-col>
   </el-row>
 </template>
 
@@ -227,7 +328,7 @@ export default {
 }
 
 .block {
-  padding: 30px 0;
+  padding: 0 0;
   text-align: center;
   border-right: solid 1px var(--el-border-color);
   flex: 1;
@@ -235,7 +336,7 @@ export default {
 .block:last-child {
   border-right: none;
 }
-.block .demonstration {
+.block{
   display: block;
   color: var(--el-text-color-secondary);
   font-size: 14px;
