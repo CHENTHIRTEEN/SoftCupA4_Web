@@ -1,4 +1,5 @@
 <script>
+import {ElNotification} from "element-plus";
 import {getCurrentInstance, inject, ref} from 'vue'
 import * as $echarts from "echarts";
 
@@ -105,22 +106,22 @@ export default {
 
       option && myChart.setOption(option);
     },
+    dateprocess(a){
+      let date = new Date(a);
+      let y = date.getFullYear();
+      let m = date.getMonth() + 1;
+      m = m < 10 ? ('0' + m) : m;
+      let d = date.getDate();
+      d = d < 10 ? ('0' + d) : d;
+      let h = date.getHours();
+      let minute = date.getMinutes();
+      h = h < 10 ? ('0' + h) : h;
+      minute = minute < 10 ? ('0' + minute) : minute;
+      return y + '-' + m + '-' + d+' '+h+':'+minute + ':00';
+    },
     predict(TurbID, startDatetime, endDatetime){
-      function f(a) {
-        let date = new Date(a);
-        let y = date.getFullYear();
-        let m = date.getMonth() + 1;
-        m = m < 10 ? ('0' + m) : m;
-        let d = date.getDate();
-        d = d < 10 ? ('0' + d) : d;
-        let h = date.getHours();
-        let minute = date.getMinutes();
-        h = h < 10 ? ('0' + h) : h;
-        minute = minute < 10 ? ('0' + minute) : minute;
-        return y + '-' + m + '-' + d+' '+h+':'+minute + ':00';
-      }
-      let start = f(startDatetime)
-      let end = f(endDatetime)
+      let start = this.dateprocess(startDatetime)
+      let end = this.dateprocess(endDatetime)
       let params = {
         'TurbID': TurbID,
         'startDatetime': start,
@@ -128,13 +129,26 @@ export default {
       }
       console.log(params)
       this.$http.post('/predict/predict_dfloc', params).then((res) => {
-        const time = res.data.data.DATATIME
-        const data1 = res.data.data.YD15
-        const data2 = res.data.data.ROUND
-        // console.log(time)
-        // console.log(data1)
-        // console.log(data2)
-        this.draw(time, data1, data2)
+        console.log(res)
+        if (res.data.code === 100) {
+          ElNotification({
+            title:'出错了捏',
+            message: res.data.message,
+            type:'warning',
+            offset: 100,
+            duration:1500
+          })
+        }
+        if (res.data.code === 200) {
+          const time = res.data.data.DATATIME
+          const data1 = res.data.data.YD15
+          const data2 = res.data.data.ROUND
+          // console.log(time)
+          // console.log(data1)
+          // console.log(data2)
+          this.draw(time, data1, data2)
+        }
+
       })
     },
     disabledDate(time){
@@ -158,7 +172,7 @@ export default {
         this.value1.push(res.data.start)
         this.value1.push(res.data.end)
       })
-      console.log("=========", this.value1[0])
+      // console.log("=========", this.value1[0])
     }
   },
   setup() {
