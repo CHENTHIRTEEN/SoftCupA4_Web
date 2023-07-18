@@ -52,18 +52,10 @@ export default {
           <el-icon><Coordinate /></el-icon>异常数据展示
         </el-menu-item>
     </el-sub-menu>
-    <el-sub-menu index="2">
-      <template #title>
-        <el-icon><Files /></el-icon>
-        <span>数据管理</span>
-      </template>
-      <el-menu-item index="upload">
-        <el-icon><SetUp /></el-icon>数据集上传
-      </el-menu-item>
-      <el-menu-item index="list">
-        <el-icon><Goods /></el-icon>数据集列表
-      </el-menu-item>
-    </el-sub-menu>
+    <el-menu-item index="data">
+      <el-icon><document /></el-icon>
+      <template #title>风场数据管理</template>
+    </el-menu-item>
 <!--    <el-menu-item index="upload">-->
 <!--      <el-icon><setting /></el-icon>-->
 <!--      <template #title>Navigator Four</template>-->
