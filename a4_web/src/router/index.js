@@ -16,9 +16,9 @@ const routes = [
     component: () => import('../views/layout/Layout.vue'),
     children: [
       {
-        path: '/list',
-        name: 'list',
-        component: () => import('../views/page/DataList.vue')
+        path: '/data',
+        name: 'data',
+        component: () => import('../views/page/DataSet.vue')
       },
       {
         path: '/homePage',
