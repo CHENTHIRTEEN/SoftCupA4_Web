@@ -29,10 +29,10 @@ export default {
       <el-icon><Lightning /></el-icon>
       <template #title>龙源风电预测系统</template>
     </el-menu-item>
-    <el-menu-item index="homePage">
-      <el-icon><document /></el-icon>
-      <template #title>首页</template>
-    </el-menu-item>
+<!--    <el-menu-item index="homePage">-->
+<!--      <el-icon><document /></el-icon>-->
+<!--      <template #title>首页</template>-->
+<!--    </el-menu-item>-->
 <!--    <el-menu-item index="power">-->
 <!--      <el-icon><document /></el-icon>-->
 <!--      <template #title>Navigator Three</template>-->
@@ -48,9 +48,9 @@ export default {
         <el-menu-item index="eda">
           <el-icon><DataLine /></el-icon>数据可视化
         </el-menu-item>
-        <el-menu-item index="showError">
-          <el-icon><Coordinate /></el-icon>异常数据展示
-        </el-menu-item>
+<!--        <el-menu-item index="showError">-->
+<!--          <el-icon><Coordinate /></el-icon>异常数据展示-->
+<!--        </el-menu-item>-->
     </el-sub-menu>
     <el-menu-item index="data">
       <el-icon><document /></el-icon>
