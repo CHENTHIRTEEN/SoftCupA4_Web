@@ -51,7 +51,7 @@ export default {
               show: true,
               realtime: true,
               start: 0,
-              end: 100,
+              end: 70,
               xAxisIndex: [0, 1]
             }
             // {
@@ -86,7 +86,7 @@ export default {
           },
           series: [
             {
-              name: 'ROUND(A.POWER,0)',
+              name: 'YD15',
               type: 'line',
               smooth: true,
               // prettier-ignore
@@ -94,7 +94,7 @@ export default {
               // data: [300, 280, 250, 260, 270, 300, 550, 500, 400, 390, 380, 390, 400, 500, 600, 750, 800, 700, 600, 400]
             },
             {
-              name: 'YD15',
+              name: 'ROUND(A.POWER,0)',
               type: 'line',
               smooth: true,
               // prettier-ignore
@@ -217,7 +217,7 @@ export default {
               show: true,
               realtime: true,
               start: 0,
-              end: 100,
+              end: 70,
               xAxisIndex: [0, 1]
             }
             // {
@@ -252,7 +252,7 @@ export default {
           },
           series: [
             {
-              name: 'ROUND(A.POWER,0)',
+              name: 'YD15',
               type: 'line',
               smooth: true,
               // prettier-ignore
@@ -260,7 +260,7 @@ export default {
               // data: [300, 280, 250, 260, 270, 300, 550, 500, 400, 390, 380, 390, 400, 500, 600, 750, 800, 700, 600, 400]
             },
             {
-              name: 'YD15',
+              name: 'ROUND(A.POWER,0)',
               type: 'line',
               smooth: true,
               // prettier-ignore
@@ -282,18 +282,14 @@ export default {
 
   }
 }
-
-
-
-
-
 </script>
 
 <template>
   <el-row>
-    <el-col :span="24"><div>功率预测</div></el-col>
+<!--    <el-col :span="24"><div>功率预测</div></el-col>-->
   </el-row>
   <el-row>
+    <el-col :span="2">日期选择：</el-col>
     <el-col :span="8">
       <el-date-picker
           v-model="value1"
@@ -302,6 +298,7 @@ export default {
           end-placeholder="End Date"
       />
     </el-col>
+    <el-col :span="2">风场选择：</el-col>
     <el-col :span="8">
       <el-select v-model="value" clearable placeholder="Select" @change="setDateRange(value)">
         <el-option
@@ -318,7 +315,7 @@ export default {
   </el-row>
   <el-row>
     <el-col :span="5"></el-col>
-    <el-col :span="12">
+    <el-col :span="24">
       <div id="chart" style="width: 1200px;height:800px;"></div>
     </el-col>
     <el-col :span="6"></el-col>
